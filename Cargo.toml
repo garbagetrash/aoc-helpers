@@ -1,5 +1,5 @@
 [package]
-name = "astar-rs"
+name = "aoc-helpers"
 version = "0.1.0"
 edition = "2021"
 
