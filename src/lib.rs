@@ -1,5 +1,15 @@
+use uuid::Uuid;
+
 struct Node<T> {
+    id: Uuid,
     value: T,
+}
+
+impl<T> Node<T> {
+    fn new(value: T) -> Node<T> {
+        let id = Uuid::new_v4();
+        Node { id, value }
+    }
 }
 
 struct Edge<'a, T> {
@@ -22,7 +32,7 @@ impl<'a, T> Graph<'a, T> {
     }
 
     fn add_node_with_value(&mut self, value: T) {
-        let node = Node::<T>{ value: value };
+        let node = Node::new(value);
         self.nodes.push(node);
     }
 }
@@ -33,8 +43,8 @@ mod tests {
 
     #[test]
     fn nodes_and_edges() {
-        let n1 = Node::<i64>{ value: 12 };
-        let n2 = Node::<i64>{ value: 10 };
+        let n1 = Node::new(12);
+        let n2 = Node::new(10);
 
         let e = Edge::<i64>{ node1: &n1, node2: &n2 };
 
@@ -44,7 +54,7 @@ mod tests {
     #[test]
     fn graphs() {
         let mut g = Graph::<i64>::new();
-        g.add_node(Node::<i64>{ value: 12 });
+        g.add_node(Node::new(12));
         assert_eq!(g.nodes[0].value, 12);
 
         g.add_node_with_value(15);
