@@ -1,6 +1,8 @@
 use std::collections::HashSet;
 use uuid::Uuid;
 
+pub mod csg;
+
 #[derive(Clone, Debug)]
 struct Node<T: Clone> {
     id: Uuid,
