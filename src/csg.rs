@@ -1,14 +1,14 @@
 use std::collections::HashSet;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-struct Cube {
-    xvalues: (i64, i64),
-    yvalues: (i64, i64),
-    zvalues: (i64, i64),
+pub struct Cube {
+    pub xvalues: (i64, i64),
+    pub yvalues: (i64, i64),
+    pub zvalues: (i64, i64),
 }
 
 impl Cube {
-    fn new(xvalues: (i64, i64), yvalues: (i64, i64), zvalues: (i64, i64)) -> Cube {
+    pub fn new(xvalues: (i64, i64), yvalues: (i64, i64), zvalues: (i64, i64)) -> Cube {
         Cube {
             xvalues,
             yvalues,
@@ -16,13 +16,13 @@ impl Cube {
         }
     }
 
-    fn volume(&self) -> usize {
+    pub fn volume(&self) -> usize {
         ((self.xvalues.1 - self.xvalues.0)
             * (self.yvalues.1 - self.yvalues.0)
             * (self.zvalues.1 - self.zvalues.0)) as usize
     }
 
-    fn intersect(&self, other: Cube) -> Option<Cube> {
+    pub fn intersect(&self, other: Cube) -> Option<Cube> {
         if let Some(xint) = intersect_1d(self.xvalues, other.xvalues) {
             if let Some(yint) = intersect_1d(self.yvalues, other.yvalues) {
                 intersect_1d(self.zvalues, other.zvalues).map(|zint| Cube::new(xint, yint, zint))
@@ -36,7 +36,7 @@ impl Cube {
 }
 
 // Partitioning a 1d range with its intersection can result in up to 3 ranges.
-fn partition_1d(range1: (i64, i64), intersection: (i64, i64)) -> Vec<(i64, i64)> {
+pub fn partition_1d(range1: (i64, i64), intersection: (i64, i64)) -> Vec<(i64, i64)> {
     let mut output = vec![];
     if range1.0 < intersection.0 {
         output.push((range1.0, intersection.0));
@@ -50,7 +50,7 @@ fn partition_1d(range1: (i64, i64), intersection: (i64, i64)) -> Vec<(i64, i64)>
 
 // When breaking up cube, smaller cubes can occupy 3x3x3 possible spaces, so up
 // to 27 cubes result
-fn partition_3d(cube: Cube, intersection: Cube) -> Vec<Cube> {
+pub fn partition_3d(cube: Cube, intersection: Cube) -> Vec<Cube> {
     let xparts = partition_1d(cube.xvalues, intersection.xvalues);
     let yparts = partition_1d(cube.yvalues, intersection.yvalues);
     let zparts = partition_1d(cube.zvalues, intersection.zvalues);
@@ -66,7 +66,7 @@ fn partition_3d(cube: Cube, intersection: Cube) -> Vec<Cube> {
     output
 }
 
-fn cube_sum(cube1: Cube, cube2: Cube) -> Vec<Cube> {
+pub fn cube_sum(cube1: Cube, cube2: Cube) -> Vec<Cube> {
     let mut cubes = vec![cube1];
     if let Some(intersection) = cube1.intersect(cube2) {
         // Partition space into non overlapping cubes. Keep cube1 the same,
@@ -84,7 +84,7 @@ fn cube_sum(cube1: Cube, cube2: Cube) -> Vec<Cube> {
     cubes
 }
 
-fn add_cube_to_set(cube: Cube, cubeset: &mut HashSet<Cube>) {
+pub fn add_cube_to_set(cube: Cube, cubeset: &mut HashSet<Cube>) {
     let mut cubes_to_update = vec![];
     for sub_cube in cubeset.iter() {
         if cube.intersect(*sub_cube).is_some() {
@@ -113,7 +113,7 @@ fn add_cube_to_set(cube: Cube, cubeset: &mut HashSet<Cube>) {
 }
 
 // cube1 - cube2
-fn cube_difference(cube1: Cube, cube2: Cube) -> Vec<Cube> {
+pub fn cube_difference(cube1: Cube, cube2: Cube) -> Vec<Cube> {
     let mut cubes = vec![];
     if let Some(intersection) = cube1.intersect(cube2) {
         // Partition space into non overlapping cubes
@@ -129,7 +129,7 @@ fn cube_difference(cube1: Cube, cube2: Cube) -> Vec<Cube> {
     cubes
 }
 
-fn remove_cube_from_set(cube: Cube, cubeset: &mut HashSet<Cube>) {
+pub fn remove_cube_from_set(cube: Cube, cubeset: &mut HashSet<Cube>) {
     let mut cubes_to_update = vec![];
     for sub_cube in cubeset.iter() {
         if cube.intersect(*sub_cube).is_some() {
