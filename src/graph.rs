@@ -1,4 +1,5 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
+use std::hash::Hash;
 use uuid::Uuid;
 
 #[derive(Clone, Debug)]
@@ -101,6 +102,66 @@ impl<T: Clone> Graph<T> {
     }
 }
 
+pub trait Connected {
+    type Item;
+    fn get_neighbors(&self, node: &Self::Item) -> Vec<Self::Item>;
+}
+
+pub fn shortest_path<T, U>(start: &T, end: &T, graph: &U) -> Option<Vec<T>>
+where T: Clone + Eq + Hash,
+      U: Connected<Item = T>,
+{
+    let mut paths: HashMap<T, Vec<T>> = HashMap::new();
+    let mut investigate: HashSet<T> = HashSet::new();
+    let mut visited: HashSet<T> = HashSet::new();
+
+    investigate.insert(end.clone());
+    paths.insert(end.clone(), vec![end.clone()]);
+    loop {
+        let mut investigate_next: HashSet<T> = HashSet::new();
+
+        // Iterate over nodes to investigate
+        for trial in &investigate {
+            let neighbors = graph.get_neighbors(&trial);
+
+            // Iterate over neighbors of trial node
+            let curr_path = paths.get(trial).unwrap().clone();
+            for n in neighbors {
+                if let Some(p) = paths.get_mut(&n) {
+                    // If there exists a path to n already, see if this one is
+                    // shorter, insert if it is.
+                    if p.len() > curr_path.len() + 1 {
+                        let mut tpath = curr_path.clone();
+                        tpath.push(n.clone());
+                        *p = tpath;
+                    }
+                } else {
+                    // If there is no path to n already, use this one
+                    let mut tpath = curr_path.clone();
+                    tpath.push(n.clone());
+                    paths.insert(n.clone(), tpath);
+                }
+
+                // Visit n if we haven't already
+                if !visited.contains(&n) {
+                    investigate_next.insert(n);
+                }
+            }
+
+            // Put trial in visited if it isn't already there
+            visited.insert(trial.clone());
+        }
+
+        if investigate_next.is_empty() {
+            break;
+        } else {
+            investigate = investigate_next;
+        }
+    }
+
+    paths.get(&start).cloned()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -134,5 +195,41 @@ mod tests {
         testset.insert(id1);
         testset.insert(id2);
         assert_eq!(neighbors, testset);
+    }
+
+    #[test]
+    fn path_finding() {
+        impl Connected for HashSet::<(usize, usize)> {
+            type Item = (usize, usize);
+            fn get_neighbors(&self, node: &Self::Item) -> Vec<Self::Item> {
+                let mut candidates = vec![];
+                candidates.push((node.0, node.1 + 1));
+                candidates.push((node.0 + 1, node.1));
+                if node.1 > 0 {
+                    candidates.push((node.0, node.1 - 1));
+                }
+                if node.0 > 0 {
+                    candidates.push((node.0 - 1, node.1));
+                }
+
+                let mut output = vec![];
+                for candidate in candidates {
+                    if self.contains(&candidate) {
+                        output.push(candidate);
+                    }
+                }
+                output
+            }
+        }
+        let mut graph: HashSet<(usize, usize)> = HashSet::new();
+        for i in 0..20 {
+            for j in 0..20 {
+                graph.insert((i, j));
+            }
+        }
+        let path = shortest_path(&(12, 16), &(15, 7), &graph).unwrap();
+        assert_eq!(path.len() - 1, 12);
+        let path = shortest_path(&(2, 16), &(15, 17), &graph).unwrap();
+        assert_eq!(path.len() - 1, 14);
     }
 }
