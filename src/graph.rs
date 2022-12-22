@@ -5,7 +5,7 @@ use uuid::Uuid;
 #[derive(Clone, Debug)]
 pub struct Node<T: Clone> {
     id: Uuid,
-    value: T,
+    pub value: T,
 }
 
 impl<T: Clone> Node<T> {

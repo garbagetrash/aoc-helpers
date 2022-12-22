@@ -122,12 +122,20 @@ impl<T: Copy + Debug> LinkedList<T> {
 
         if let Some(hid) = head_id {
             self.data[hid].tail = tail_id;
+            if Some(node_id) == self.head {
+                // If we just popped list head, reassign
+                self.head = tail_id;
+            }
         } else {
             // If no head to node_id, then it was the list head
             self.head = tail_id;
         }
         if let Some(tid) = tail_id {
             self.data[tid].head = head_id;
+            if Some(node_id) == self.tail {
+                // If we just popped list tail, reassign
+                self.tail = head_id;
+            }
         } else {
             // If no tail to node_id, then it was the list tail
             self.tail = head_id;
