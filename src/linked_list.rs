@@ -103,6 +103,9 @@ impl<T: Copy + Debug> LinkedList<T> {
         self.data[node_id].tail = Some(new_id);
         if let Some(next_id) = new_node.tail {
             self.data[next_id].head = Some(new_id);
+            if Some(node_id) == self.tail {
+                self.tail = Some(new_id);
+            }
         } else {
             // If no tail to node_id, then it was the list tail
             self.tail = Some(new_id);
