@@ -101,17 +101,19 @@ impl<T: Copy + Debug> LinkedList<T> {
         new_node.head = Some(node_id);
         new_node.tail = self.data[node_id].tail;
         self.data[node_id].tail = Some(new_id);
-        if let Some(next_id) = new_node.tail {
-            self.data[next_id].head = Some(new_id);
-            if Some(node_id) == self.tail {
-                self.tail = Some(new_id);
-            }
-        } else {
-            // If no tail to node_id, then it was the list tail
+
+        // If node_id is list tail, set new list tail
+        if Some(node_id) == self.tail {
             self.tail = Some(new_id);
         }
+
+        if let Some(next_id) = new_node.tail {
+            self.data[next_id].head = Some(new_id);
+        }
+
         self.data.push(new_node);
         self.size += 1;
+
         new_id
     }
 
@@ -123,26 +125,25 @@ impl<T: Copy + Debug> LinkedList<T> {
         let head_id = self.data[node_id].head;
         let tail_id = self.data[node_id].tail;
 
+        // If we just popped list head, reassign
+        if Some(node_id) == self.head {
+            self.head = tail_id;
+        }
+
+        // If we just popped list tail, reassign
+        if Some(node_id) == self.tail {
+            self.tail = head_id;
+        }
+
+        // If the list is circular these can trigger even when node_id is
+        // the list head or tail.
         if let Some(hid) = head_id {
             self.data[hid].tail = tail_id;
-            if Some(node_id) == self.head {
-                // If we just popped list head, reassign
-                self.head = tail_id;
-            }
-        } else {
-            // If no head to node_id, then it was the list head
-            self.head = tail_id;
         }
         if let Some(tid) = tail_id {
             self.data[tid].head = head_id;
-            if Some(node_id) == self.tail {
-                // If we just popped list tail, reassign
-                self.tail = head_id;
-            }
-        } else {
-            // If no tail to node_id, then it was the list tail
-            self.tail = head_id;
         }
+
         self.size -= 1;
         self.data[node_id].value
     }
