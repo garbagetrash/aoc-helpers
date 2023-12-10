@@ -4,7 +4,7 @@ use uuid::Uuid;
 
 #[derive(Clone, Debug)]
 pub struct Node<T: Clone> {
-    id: Uuid,
+    pub id: Uuid,
     pub value: T,
 }
 
@@ -100,6 +100,9 @@ impl<T: Clone> Graph<T> {
     pub fn add_edge(&mut self, node1: Uuid, node2: Uuid) {
         self.edges.insert((node1, node2));
     }
+
+    // TODO: Add a method to `get_connected_nodes(&self, node: Uuid) -> Vec<Uuid>
+    // which will walk the graph and get all nodes connected to the input `node`.
 }
 
 pub trait Connected {
