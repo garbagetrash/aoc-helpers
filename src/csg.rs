@@ -153,13 +153,13 @@ pub fn remove_cube_from_set(cube: Cube, cubeset: &mut HashSet<Cube>) {
 }
 
 #[derive(Clone, Copy, Debug)]
-struct Instruction {
-    turn_on: bool,
-    cube: Cube,
+pub struct Instruction {
+    pub turn_on: bool,
+    pub cube: Cube,
 }
 
 impl Instruction {
-    fn new(
+    pub fn new(
         turn_on: bool,
         xvalues: (i64, i64),
         yvalues: (i64, i64),
@@ -172,7 +172,7 @@ impl Instruction {
     }
 }
 
-fn load_input(input: &str) -> Vec<Instruction> {
+pub fn load_input(input: &str) -> Vec<Instruction> {
     let mut output = vec![];
     for line in input.lines() {
         let mut liter = line.split(' ');
@@ -233,7 +233,7 @@ fn load_input(input: &str) -> Vec<Instruction> {
     output
 }
 
-fn part1(input: &[Instruction]) -> usize {
+pub fn part1(input: &[Instruction]) -> usize {
     let mut on_set: HashSet<Cube> = HashSet::new();
 
     for inst in input.iter().take(20) {
@@ -269,7 +269,7 @@ fn intersect_1d(range1: (i64, i64), range2: (i64, i64)) -> Option<(i64, i64)> {
     }
 }
 
-fn part2(input: &[Instruction]) -> usize {
+pub fn part2(input: &[Instruction]) -> usize {
     let mut on_set: HashSet<Cube> = HashSet::new();
 
     for inst in input {

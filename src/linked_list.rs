@@ -168,7 +168,7 @@ impl<T: Copy + Debug> LinkedList<T> {
                     break;
                 }
             }
-            println!("");
+            println!();
         }
     }
 }

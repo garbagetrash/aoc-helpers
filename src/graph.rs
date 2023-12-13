@@ -2,13 +2,13 @@ use std::collections::{HashMap, HashSet};
 use std::hash::Hash;
 use uuid::Uuid;
 
-#[derive(Clone, Debug)]
-pub struct Node<T: Clone> {
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub struct Node<T: Clone + PartialEq + Eq + Hash> {
     pub id: Uuid,
     pub value: T,
 }
 
-impl<T: Clone> Node<T> {
+impl<T: Clone + PartialEq + Eq + Hash> Node<T> {
     pub fn new(value: T) -> Node<T> {
         let id = Uuid::new_v4();
         Node { id, value }
@@ -16,29 +16,34 @@ impl<T: Clone> Node<T> {
 }
 
 #[derive(Clone, Debug)]
-pub struct Graph<T: Clone> {
+pub struct Graph<T: Clone + PartialEq + Eq + Hash> {
     pub nodes: Vec<Node<T>>,
     pub edges: HashSet<(Uuid, Uuid)>,
+    pub idmap: HashMap<T, Uuid>,
 }
 
-impl<T: Clone> Graph<T> {
+impl<T: Clone + PartialEq + Eq + Hash> Graph<T> {
     pub fn new() -> Graph<T> {
         Graph {
             nodes: vec![],
             edges: HashSet::new(),
+            idmap: HashMap::new(),
         }
     }
 
     pub fn add_node(&mut self, new_node: Node<T>) -> Uuid {
         let output = new_node.id;
+        let value = new_node.clone().value;
         self.nodes.push(new_node);
+        self.idmap.insert(value, output);
         output
     }
 
     pub fn add_node_with_value(&mut self, value: T) -> Uuid {
-        let node = Node::new(value);
+        let node = Node::new(value.clone());
         let output = node.id;
         self.nodes.push(node);
+        self.idmap.insert(value, output);
         output
     }
 
@@ -50,7 +55,27 @@ impl<T: Clone> Graph<T> {
         ids
     }
 
-    pub fn get_node(&self, id: Uuid) -> Option<&Node<T>> {
+    pub fn get_id_from_value(&self, value: &T) -> Option<Uuid> {
+        self.idmap.get(value).copied()
+    }
+
+    pub fn get_node_from_value(&self, value: &T) -> Option<&Node<T>> {
+        if let Some(id) = self.idmap.get(value) {
+            self.get_node_from_id(*id)
+        } else {
+            None
+        }
+    }
+
+    pub fn get_node_from_value_mut(&mut self, value: &T) -> Option<&mut Node<T>> {
+        if let Some(id) = self.idmap.get(value) {
+            self.get_node_from_id_mut(*id)
+        } else {
+            None
+        }
+    }
+
+    pub fn get_node_from_id(&self, id: Uuid) -> Option<&Node<T>> {
         for node in &self.nodes {
             if node.id == id {
                 return Some(node);
@@ -59,7 +84,7 @@ impl<T: Clone> Graph<T> {
         None
     }
 
-    pub fn get_node_mut(&mut self, id: Uuid) -> Option<&mut Node<T>> {
+    pub fn get_node_from_id_mut(&mut self, id: Uuid) -> Option<&mut Node<T>> {
         for node in &mut self.nodes {
             if node.id == id {
                 return Some(node);
@@ -70,7 +95,7 @@ impl<T: Clone> Graph<T> {
 
     pub fn get_node_values(&self, ids: &[Uuid]) -> Vec<Option<T>> {
         ids.iter()
-            .map(|x| self.get_node(*x).map(|node| node.value.clone()))
+            .map(|x| self.get_node_from_id(*x).map(|node| node.value.clone()))
             .collect()
     }
 
@@ -111,8 +136,9 @@ pub trait Connected {
 }
 
 pub fn shortest_path<T, U>(start: &T, end: &T, graph: &U) -> Option<Vec<T>>
-where T: Clone + Eq + Hash,
-      U: Connected<Item = T>,
+where
+    T: Clone + Eq + Hash,
+    U: Connected<Item = T>,
 {
     let mut paths: HashMap<T, Vec<T>> = HashMap::new();
     let mut investigate: HashSet<T> = HashSet::new();
@@ -202,7 +228,7 @@ mod tests {
 
     #[test]
     fn path_finding() {
-        impl Connected for HashSet::<(usize, usize)> {
+        impl Connected for HashSet<(usize, usize)> {
             type Item = (usize, usize);
             fn get_neighbors(&self, node: &Self::Item) -> Vec<Self::Item> {
                 let mut candidates = vec![];
