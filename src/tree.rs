@@ -14,6 +14,7 @@ impl<T: Clone + PartialEq + Eq> TreeNode<T> {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct Tree<T: Clone + PartialEq + Eq> {
     pub head: Option<usize>,
     pub nodes: Vec<TreeNode<T>>,
