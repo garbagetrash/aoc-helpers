@@ -10,7 +10,12 @@ pub struct TreeNode<T: Clone + PartialEq + Eq> {
 
 impl<T: Clone + PartialEq + Eq> TreeNode<T> {
     pub fn new(id: usize, value: T, parent: Option<usize>) -> Self {
-        Self { id, value, parent, children: vec![] }
+        Self {
+            id,
+            value,
+            parent,
+            children: vec![],
+        }
     }
 }
 
@@ -70,7 +75,11 @@ impl<T: Clone + PartialEq + Eq> Tree<T> {
     }
 
     pub fn leaves(&self) -> Vec<usize> {
-        self.nodes.iter().filter(|n| n.children.len() == 0).map(|n| n.id).collect()
+        self.nodes
+            .iter()
+            .filter(|n| n.children.len() == 0)
+            .map(|n| n.id)
+            .collect()
     }
 
     pub fn leaf_values(&self) -> Vec<&T> {

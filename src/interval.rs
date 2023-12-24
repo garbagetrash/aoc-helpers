@@ -1,3 +1,5 @@
+use std::fmt;
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 /// Interval of integers [min...max] inclusive.
 pub struct Interval {
@@ -100,6 +102,12 @@ impl Interval {
     }
 }
 
+impl fmt::Display for Interval {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "[{}..{}]", self.min, self.max)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::Interval;
@@ -150,7 +158,10 @@ mod tests {
         assert_eq!(int1.difference(int3), vec![Interval::new(-2, -2)]);
         assert_eq!(int1.difference(int4), vec![Interval::new(1, 3)]);
         assert_eq!(int4.difference(int1), vec![Interval::new(-5, -3)]);
-        assert_eq!(int1.difference(int5), vec![Interval::new(-2, -2), Interval::new(1, 3)]);
+        assert_eq!(
+            int1.difference(int5),
+            vec![Interval::new(-2, -2), Interval::new(1, 3)]
+        );
         assert_eq!(int1.difference(int6), vec![Interval::new(1, 3)]);
         assert_eq!(int1.difference(int7), vec![Interval::new(-2, -1)]);
     }
